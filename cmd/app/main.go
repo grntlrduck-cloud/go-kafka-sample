@@ -25,18 +25,18 @@ func main() {
 			panic("failed to shut down kafka contianer")
 		}
 	}()
-  println("#### started container sucessfully ####")
+	println("#### started container sucessfully ####")
 
 	producer := kafka.NewProducer(kafkaContainer.BootstrapServers)
 	defer producer.Close()
-  println("#### created producer ####")
-  
-  // create the topic by sending a message
+	println("#### created producer ####")
+
+	// create the topic by sending a message
 	kafkaSendErr := producer.SendEventSync(demoTopicName, uuid.New().String(), "hello world")
 	if kafkaSendErr != nil {
 		fmt.Printf("failed to send kafka message %v", kafkaSendErr)
 	}
-  time.Sleep(2 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	consumer := kafka.NewConsumer(kafka.KafkaConsumerProps{
 		BootstrapServers: kafkaContainer.BootstrapServers,
@@ -50,9 +50,9 @@ func main() {
 	ctxCancel, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	go consumer.Consume(ctxCancel)
-  println("#### started consumer ####")
-  
-  println("#### sending messages ... ####")
+	println("#### started consumer ####")
+
+	println("#### sending messages ... ####")
 	// could use go-routines or a wait group here instead of blunt for
 	for range 1000 {
 		kafkaSendErr := producer.SendEventSync(demoTopicName, uuid.New().String(), "hello there")
@@ -60,7 +60,7 @@ func main() {
 			fmt.Printf("failed to send kafka message %v", kafkaSendErr)
 		}
 	}
-  println("#### done publishing ####")
+	println("#### done publishing ####")
 
 	// give the consumer some processing time
 	time.Sleep(2 * time.Second)
