@@ -31,9 +31,7 @@ func StartKafka(ctx context.Context) KafkaBrokerContainer {
 		}
 		panic("failed to get BootstrapServers for kafka container")
 	}
-	println("######################################################################")
 	bootstrapServers := strings.Join(brokers, ",")
-	fmt.Printf("## using kafka bootstrap servers=%s ##\n", bootstrapServers)
-	println("######################################################################")
+	fmt.Printf("#### using kafka bootstrap servers=%s ####\n", bootstrapServers)
 	return KafkaBrokerContainer{Broker: kafkaContainer, BootstrapServers: bootstrapServers}
 }
