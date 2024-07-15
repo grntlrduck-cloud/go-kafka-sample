@@ -36,7 +36,7 @@ func (p *KafkaProducer) SendEventSync(topic string, key string, event string) er
 func (p *KafkaProducer) Close() {
 	p.producer.Flush(100)
 	p.producer.Close()
-  println("closed producer")
+  println("#### closed producer ####")
 }
 
 func NewProducer(bootStrapServers string) *KafkaProducer {

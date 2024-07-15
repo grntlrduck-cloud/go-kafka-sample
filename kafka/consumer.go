@@ -8,7 +8,7 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
-const minCommitCount = 5
+const minCommitCount = 10
 
 type KafkaConsumerProps struct {
 	BootstrapServers string
@@ -32,7 +32,7 @@ func (c *KafkaConsumer) Consume(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		default:
-			c.poll(msgCount)
+			c.poll(&msgCount)
 		}
 	}
 }
@@ -42,18 +42,19 @@ func (c *KafkaConsumer) Close() {
 	if err != nil {
 		panic("failed to close consumer")
 	}
-	println("closed consumer")
+	println("#### closed consumer ####")
 }
 
-func (c *KafkaConsumer) poll(msgCount uint32) {
+func (c *KafkaConsumer) poll(msgCount *uint32) {
 	// source: https://docs.confluent.io/kafka-clients/go/current/overview.html
 	ev := c.consumer.Poll(100)
 	switch e := ev.(type) {
 	case *kafka.Message:
-		msgCount += 1
-		if msgCount%minCommitCount == 0 {
+		*msgCount += 1
+		if *msgCount%minCommitCount == 0 {
 			go func() {
 				offsets, err := c.consumer.Commit()
+				fmt.Printf("##### commited offset %d ####\n", *msgCount)
 				if err != nil {
 					fmt.Printf("failed to commit offset %s with error %s", offsets, err)
 				}
@@ -74,8 +75,9 @@ func NewConsumer(props KafkaConsumerProps) *KafkaConsumer {
 		"bootstrap.servers":               props.BootstrapServers,
 		"group.id":                        props.ConsumerGroup,
 		"go.application.rebalance.enable": true,
-		"socket.timeout.ms":               100000,
+		"socket.timeout.ms":               10000,
 		"log_level":                       1,
+		"auto.offset.reset":               "earliest",
 	})
 	if err != nil {
 		panic("failed to create consumer")
